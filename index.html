@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Farming - ตรวจโรคพืชด้วย AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #f5ff66 0%, #43d66f 100%);
+        }
+        
+        .gradient-hero {
+            background: linear-gradient(135deg, #43d66f 0%, #28a745 50%, #1e7e34 100%);
+        }
+        
+        .hero-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 50px 50px;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #43d66f 0%, #28a745 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 14px 24px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            color: rgb(16, 15, 15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .nav-link:hover::before {
+            left: 100%;
+        }
+        
+        .nav-link:hover {
+            color: #1e7e34;
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(67, 214, 111, 0.5);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), 0 0 20px rgba(67, 214, 111, 0.2);
+        }
+        
+        .nav-link.active {
+            color: #1e7e34;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 244, 0.95) 100%);
+            border-color: #43d66f;
+            box-shadow: 0 8px 25px rgba(67, 214, 111, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, #43d66f, #28a745);
+            border-radius: 2px;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .detect-placeholder {
+            border: 3px dashed #28a745;
+            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+            min-height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .detect-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%2328a745" opacity="0.1"/><circle cx="80" cy="80" r="2" fill="%2328a745" opacity="0.1"/><circle cx="80" cy="20" r="2" fill="%2328a745" opacity="0.1"/><circle cx="20" cy="80" r="2" fill="%2328a745" opacity="0.1"/></svg>') repeat;
+            background-size: 50px 50px;
+        }
+        
+        .admin-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-menu {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .desktop-menu {
+                display: none;
+            }
+            .mobile-menu {
+                display: block;
+            }
+            
+            .detect-placeholder {
+                min-height: 600px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header Section -->
+    <header class="gradient-header text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo Section -->
+                <div class="flex items-center space-x-4 cursor-pointer group" onclick="showPage('home')">
+<div class="group">
+  <img src="ChatGPT Image Sep 25, 2025, 10_00_35 AM.png" alt="ChatGPT Logo" 
+       class="w-24 h-24 md:w-40 md:h-40 animate-pulse-slow group-hover:scale-110 transition-transform duration-300">
+</div>
+                    <div class="group-hover:translate-x-1 transition-transform duration-300">
+                        <h1 class="text-3xl font-bold text-black drop-shadow-lg">Smart Farming</h1>
+                        <p class="text-sm font-medium text-black opacity-90">ตรวจโรคพืชด้วย AI</p>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <nav class="desktop-menu">
+                    <ul class="flex items-center space-x-2">
+                        <li><a href="#" onclick="showPage('home')" class="nav-link font-medium flex items-center space-x-2" id="nav-home">
+                            <span class="text-lg">🏠</span>
+                            <span>Home</span>
+                        </a></li>
+                        <li><a href="#" onclick="showPage('detect')" class="nav-link font-medium flex items-center space-x-2" id="nav-detect">
+                            <span class="text-lg">🔬</span>
+                            <span>ตรวจโรคพืช</span>
+                        </a></li>
+                        <li><a href="#" onclick="showPage('admin')" class="nav-link font-medium flex items-center space-x-2" id="nav-admin">
+                            <span class="text-lg">📊</span>
+                            <span>สถิติ</span>
+                        </a></li>
+                    </ul>
+                </nav>
+                
+                <!-- User Profile -->
+                <div id="userProfile" class="hidden items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-white font-semibold" id="userDisplayName">ผู้ใช้งาน</div>
+                        <div class="text-green-200 text-sm" id="userRole">สมาชิก</div>
+                    </div>
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-4 py-2 hover:bg-opacity-30 transition-colors">
+                            <div class="text-2xl" id="userAvatar">👨‍🌾</div>
+                            <span class="text-white">▼</span>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50">
+                            <a href="#" onclick="showPage('admin')" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">📊 ประวัติการใช้งาน</a>
+                            <a href="#" onclick="logout()" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">🚪 ออกจากระบบ</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu text-2xl" id="mobileMenuBtn">☰</button>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <nav id="mobileNav" class="mobile-menu hidden mt-4 pb-4">
+                <ul class="space-y-3">
+                    <li><a href="#" onclick="showPage('home')" class="block py-2 hover:text-green-300">Home</a></li>
+                    <li><a href="#" onclick="showPage('detect')" class="block py-2 hover:text-green-300">ตรวจโรคพืช</a></li>
+                    <li><a href="#" onclick="showPage('admin')" class="block py-2 hover:text-green-300">สถิติ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page" class="page active">
+        <section class="gradient-hero hero-pattern text-white min-h-screen flex items-center">
+            <div class="container mx-auto px-6">
+                <div class="max-w-md mx-auto">
+                    <!-- Login Form -->
+                    <div id="loginForm" class="bg-white bg-opacity-95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl">
+                        <div class="text-center mb-8">
+                            <div class="text-6xl mb-4">🌱</div>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Smart Farming</h1>
+                            <p class="text-gray-600">เข้าสู่ระบบตรวจโรคพืชด้วย AI</p>
+                        </div>
+                        
+                        <form onsubmit="handleLogin(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">ชื่อผู้ใช้งาน</label>
+                                <input type="text" id="loginUsername" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="กรอกชื่อผู้ใช้งาน">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">รหัสผ่าน</label>
+                                <input type="password" id="loginPassword" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="กรอกรหัสผ่าน">
+                            </div>
+                            
+                            <button type="submit" class="btn-primary text-white px-8 py-3 rounded-xl font-semibold w-full text-lg">
+                                🔐 เข้าสู่ระบบ
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-6">
+                            <p class="text-gray-600">ยังไม่มีบัญชี? 
+                                <button onclick="showRegisterForm()" class="text-green-600 hover:text-green-700 font-semibold">
+                                    สมัครสมาชิก
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Register Form -->
+                    <div id="registerForm" class="bg-white bg-opacity-95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hidden">
+                        <div class="text-center mb-8">
+                            <div class="text-6xl mb-4">🌱</div>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">สมัครสมาชิก</h1>
+                            <p class="text-gray-600">สร้างบัญชีใหม่เพื่อใช้งานระบบ</p>
+                        </div>
+                        
+                        <form onsubmit="handleRegister(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">ชื่อ-นามสกุล</label>
+                                <input type="text" id="registerFullName" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="กรอกชื่อ-นามสกุล">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">ชื่อผู้ใช้งาน</label>
+                                <input type="text" id="registerUsername" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="กรอกชื่อผู้ใช้งาน">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">อีเมล</label>
+                                <input type="email" id="registerEmail" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="กรอกอีเมล">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">รหัสผ่าน</label>
+                                <input type="password" id="registerPassword" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="กรอกรหัสผ่าน">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">ยืนยันรหัสผ่าน</label>
+                                <input type="password" id="registerConfirmPassword" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+                                       placeholder="ยืนยันรหัสผ่าน">
+                            </div>
+                            
+                            <button type="submit" class="btn-primary text-white px-8 py-3 rounded-xl font-semibold w-full text-lg">
+                                📝 สมัครสมาชิก
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-6">
+                            <p class="text-gray-600">มีบัญชีแล้ว? 
+                                <button onclick="showLoginForm()" class="text-green-600 hover:text-green-700 font-semibold">
+                                    เข้าสู่ระบบ
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- HOME PAGE -->
+    <div id="home-page" class="page">
+        <!-- Hero Section -->
+        <section class="gradient-hero hero-pattern text-white py-20 min-h-screen flex items-center">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <!-- Hero Content -->
+                    <div class="text-center lg:text-left">
+                        <!-- Text Background Frame -->
+                        <div class="bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-gray-700 border-opacity-50 shadow-2xl">
+                            <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white drop-shadow-lg">
+                                Smart Farming
+                                <span class="block text-green-300 drop-shadow-lg">ตรวจโรคพืชด้วย AI</span>
+                            </h1>
+                            <p class="text-xl lg:text-2xl mb-8 text-gray-100 leading-relaxed drop-shadow-md">
+                                อัปโหลดภาพใบพืชและรับผลวิเคราะห์ทันที
+                                <span class="block">เทคโนโลยี AI ที่แม่นยำและรวดเร็ว</span>
+                            </p>
+                        </div>
+                        
+                        <!-- Buttons Section -->
+                        <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex justify-center lg:justify-start">
+                            <button onclick="showPage('detect')" class="btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg w-full sm:w-auto shadow-xl">
+                                🔬 เริ่มตรวจโรคพืช
+                            </button>
+                            <button onclick="showPage('admin')" class="border-2 border-yellow-400 bg-yellow-400 text-gray-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-yellow-300 hover:border-yellow-300 transition-all w-full sm:w-auto shadow-xl">
+                                📊 ดูข้อมูลสถิติ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Hero Visual -->
+                    <div class="text-center">
+                        <div class="relative">
+                            <!-- Farm Illustration -->
+                            <div class="bg-white bg-opacity-10 rounded-3xl p-8 backdrop-blur-sm">
+                                <div class="grid grid-cols-3 gap-4 mb-6">
+                                    <div class="text-6xl animate-float">🌾</div>
+                                    <div class="text-6xl animate-float" style="animation-delay: 1s;">🔬</div>
+                                    <div class="text-6xl animate-float" style="animation-delay: 2s;">🌱</div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-3 mb-6">
+                                    <div class="text-4xl animate-pulse-slow">📱</div>
+                                    <div class="text-4xl animate-pulse-slow" style="animation-delay: 0.5s;">🤖</div>
+                                    <div class="text-4xl animate-pulse-slow" style="animation-delay: 1s;">📊</div>
+                                    <div class="text-4xl animate-pulse-slow" style="animation-delay: 1.5s;">💡</div>
+                                </div>
+                                <div class="text-sm font-bold text-white bg-black bg-opacity-30 px-4 py-2 rounded-full">
+                                    AI Detection • Real-time Analysis • Smart Diagnosis
+                                </div>
+                            </div>
+                            
+                            <!-- Floating Elements -->
+                            <div class="absolute -top-4 -right-4 text-3xl animate-float">☁️</div>
+                            <div class="absolute -bottom-4 -left-4 text-3xl animate-float" style="animation-delay: 3s;">🌞</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                        ความสามารถของระบบ AI
+                    </h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        ระบบตรวจจับโรคพืชด้วยปัญญาประดิษฐ์ที่ทันสมัยและแม่นยำ
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
+                        <div class="text-6xl mb-6">🔬</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">AI Disease Detection</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            ตรวจจับโรคพืชด้วยปัญญาประดิษฐ์
+                            ความแม่นยำสูงกว่า 95%
+                        </p>
+                    </div>
+                    
+                    <!-- Feature 2 -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
+                        <div class="text-6xl mb-6">📷</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Image Analysis</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            วิเคราะห์ภาพใบพืชแบบเรียลไทม์
+                            รองรับหลายชนิดพืช
+                        </p>
+                    </div>
+                    
+                    <!-- Feature 3 -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
+                        <div class="text-6xl mb-6">💊</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Treatment Guide</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            คำแนะนำการรักษาและป้องกัน
+                            จากผู้เชี่ยวชาญด้านการเกษตร
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <button onclick="showPage('detect')" class="btn-primary text-white px-10 py-4 rounded-full font-semibold text-lg">
+                        🚀 ทดลองใช้งานเลย
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- DETECT PAGE -->
+    <div id="detect-page" class="page">
+        <section class="py-12 bg-gray-50 min-h-screen">
+            <div class="container mx-auto px-6">
+                <!-- Page Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                        <span class="text-5xl mr-4">🔬</span>
+                        ตรวจจับโรคพืชด้วย AI
+                    </h1>
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                        อัปโหลดภาพใบพืชเพื่อให้ระบบ AI วิเคราะห์และตรวจจับโรคพืชอย่างแม่นยำ
+                    </p>
+                </div>
+                
+                <!-- Working Upload Section -->
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        <!-- Upload Section -->
+                        <div class="p-8 bg-gradient-to-br from-green-50 to-blue-50">
+                            <div class="text-center mb-8">
+                                <div class="text-6xl mb-4">📷</div>
+                                <h2 class="text-3xl font-bold text-gray-800 mb-2">
+                                    อัปโหลดภาพใบพืช
+                                </h2>
+                                <p class="text-gray-600">
+                                    เลือกภาพจากเครื่องหรือถ่ายภาพด้วยกล้องเพื่อให้ AI วิเคราะห์
+                                </p>
+                            </div>
+                            
+                            <!-- Upload Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                                <button onclick="openCamera()" class="btn-primary text-white px-8 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-3 hover:scale-105 transition-transform">
+                                    <span class="text-2xl">📸</span>
+                                    <span>เปิดกล้อง</span>
+                                </button>
+                                <button onclick="document.getElementById('fileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-3 hover:scale-105 transition-transform">
+                                    <span class="text-2xl">📁</span>
+                                    <span>เลือกไฟล์</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Drag & Drop Zone -->
+                            <div id="dropZone" class="border-3 border-dashed border-blue-300 rounded-2xl p-8 mb-8 text-center bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                                <div class="text-6xl mb-4">📎</div>
+                                <h3 class="text-xl font-semibold text-blue-800 mb-2">ลากไฟล์มาวางที่นี่</h3>
+                                <p class="text-blue-600">หรือคลิกเพื่อเลือกไฟล์</p>
+                                <p class="text-sm text-blue-500 mt-2">รองรับ: JPG, PNG, GIF, WebP (สูงสุด 10MB)</p>
+                            </div>
+                            
+                            <!-- Hidden File Input -->
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                            
+                            <!-- Camera Video -->
+                            <div id="cameraSection" class="hidden mb-6">
+                                <div class="bg-black rounded-2xl overflow-hidden max-w-md mx-auto relative">
+                                    <video id="cameraVideo" autoplay playsinline muted class="w-full h-64 object-cover"></video>
+                                    <!-- Camera info overlay -->
+                                    <div id="cameraInfo" class="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                                        📷 กำลังโหลด...
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4 space-y-2">
+                                    <div class="space-x-2">
+                                        <button onclick="capturePhoto()" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
+                                            📸 ถ่ายภาพ
+                                        </button>
+                                        <button onclick="switchCamera()" id="switchCameraBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold">
+                                            🔄 เปลี่ยนกล้อง
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button onclick="stopCamera()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold">
+                                            ❌ ปิดกล้อง
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Image Preview -->
+                            <div id="imagePreview" class="hidden">
+                                <div class="bg-white rounded-2xl p-6 shadow-lg max-w-md mx-auto">
+                                    <img id="previewImage" class="w-full h-64 object-cover rounded-xl mb-4" alt="Preview">
+                                    <button onclick="analyzeImage()" class="btn-primary text-white px-8 py-3 rounded-xl font-semibold w-full text-lg">
+                                        🔬 วิเคราะห์ภาพ
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Loading -->
+                            <div id="loadingSection" class="hidden text-center">
+                                <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mb-4"></div>
+                                <p class="text-lg font-semibold text-gray-700">กำลังวิเคราะห์ภาพ...</p>
+                                <p class="text-gray-600">โปรดรอสักครู่</p>
+                            </div>
+                            
+                            <!-- Results -->
+                            <div id="resultsSection" class="hidden">
+                                <div class="bg-white rounded-2xl p-6 shadow-lg max-w-2xl mx-auto">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">
+                                        📊 ผลการวิเคราะห์
+                                    </h3>
+                                    <div id="resultContent" class="space-y-4">
+                                        <!-- Results will be inserted here -->
+                                    </div>
+                                    <button onclick="resetDetection()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold w-full mt-6">
+                                        🔄 วิเคราะห์ภาพใหม่
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Info Section -->
+                        <div class="p-8 bg-gray-50">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
+                                💡 คำแนะนำการใช้งาน
+                            </h3>
+                                
+                                <!-- Demo Features -->
+                                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                                    <div class="bg-green-50 rounded-xl p-4 cursor-pointer hover:bg-green-100 transition-colors hover:scale-105 transform duration-200" onclick="openCamera()">
+                                        <div class="text-3xl mb-2">📷</div>
+                                        <h4 class="font-semibold text-green-800">Camera Capture</h4>
+                                        <p class="text-sm text-green-600">ถ่ายภาพด้วยกล้องมือถือและเว็บแคม</p>
+                                        <div class="mt-2 text-xs text-green-700 font-medium">👆 คลิกเพื่อเปิดกล้อง</div>
+                                    </div>
+                                    <div class="bg-blue-50 rounded-xl p-4 cursor-pointer hover:bg-blue-100 transition-colors hover:scale-105 transform duration-200" onclick="document.getElementById('fileInput').click()">
+                                        <div class="text-3xl mb-2">📁</div>
+                                        <h4 class="font-semibold text-blue-800">File Upload</h4>
+                                        <p class="text-sm text-blue-600">อัปโหลดไฟล์ภาพจากเครื่อง</p>
+                                        <div class="mt-2 text-xs text-blue-700 font-medium">👆 คลิกเพื่อเลือกไฟล์</div>
+                                    </div>
+
+                                    <div class="bg-orange-50 rounded-xl p-4 cursor-pointer hover:bg-orange-100 transition-colors hover:scale-105 transform duration-200" onclick="showPage('admin')">
+                                        <div class="text-3xl mb-2">📊</div>
+                                        <h4 class="font-semibold text-orange-800">Results</h4>
+                                        <p class="text-sm text-orange-600">แสดงผลและคำแนะนำ</p>
+                                        <div class="mt-2 text-xs text-orange-700 font-medium">👆 คลิกเพื่อดูสถิติ</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Instructions -->
+                                <div class="bg-yellow-50 rounded-xl p-6 text-left">
+                                    <h4 class="font-bold text-yellow-800 mb-3">📋 คำแนะนำการใช้งาน:</h4>
+                                    <ul class="text-sm text-yellow-700 space-y-2">
+                                        <li><strong>•</strong> ถ่ายภาพใบพืชให้ชัดเจน มีแสงเพียงพอ</li>
+                                        <li><strong>•</strong> หลีกเลี่ยงเงาหรือแสงสะท้อนบนใบพืช</li>
+                                        <li><strong>•</strong> ถ่ายภาพใบพืชที่มีอาการผิดปกติชัดเจน</li>
+                                        <li><strong>•</strong> ใช้ภาพที่มีความละเอียดสูงเพื่อผลลัพธ์ที่แม่นยำ</li>
+                                        <li><strong>•</strong> หากไม่แน่ใจผลลัพธ์ ควรปรึกษาผู้เชี่ยวชาญ</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Corner Decorations -->
+                        <div class="absolute top-4 left-4 text-4xl opacity-20">🌱</div>
+                        <div class="absolute top-4 right-4 text-4xl opacity-20">🔬</div>
+                        <div class="absolute bottom-4 left-4 text-4xl opacity-20">📊</div>
+                        <div class="absolute bottom-4 right-4 text-4xl opacity-20">💡</div>
+                    </div>
+                </div>
+                
+
+            </div>
+        </section>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="admin-page" class="page">
+        <section class="py-12 bg-gray-50 min-h-screen">
+            <div class="container mx-auto px-6">
+                <!-- Page Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                        <span class="text-5xl mr-4">📊</span>
+                        ประวัติการใช้งาน
+                    </h1>
+                    <p class="text-xl text-gray-600">
+                        ประวัติการวิเคราะห์และข้อมูลการใช้งานของคุณ
+                    </p>
+                </div>
+                
+                <!-- Real-time Status -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">สถานะระบบ</h2>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-green-600 font-semibold">ออนไลน์</span>
+                            <span class="text-gray-500 text-sm" id="lastUpdate">อัปเดตล่าสุด: เมื่อสักครู่</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl mb-2">📷</div>
+                        <div class="text-3xl font-bold text-blue-600" id="totalImages">0</div>
+                        <div class="text-gray-600">ภาพที่วิเคราะห์</div>
+                        <div class="text-xs text-green-600 mt-1" id="todayImages">+0 วันนี้</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-lg text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2">
+                            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl mb-2">🦠</div>
+                        <div class="text-3xl font-bold text-red-600" id="diseasesFound">0</div>
+                        <div class="text-gray-600">โรคที่ตรวจพบ</div>
+                        <div class="text-xs text-red-600 mt-1" id="todayDiseases">+0 วันนี้</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-lg text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl mb-2">✅</div>
+                        <div class="text-3xl font-bold text-green-600" id="accuracy">0%</div>
+                        <div class="text-gray-600">ความแม่นยำ</div>
+                        <div class="text-xs text-green-600 mt-1" id="accuracyChange">เฉลี่ยทั้งหมด</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-lg text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl mb-2">👥</div>
+                        <div class="text-3xl font-bold text-purple-600" id="activeUsers">0</div>
+                        <div class="text-gray-600">ผู้ใช้งานทั้งหมด</div>
+                        <div class="text-xs text-blue-600 mt-1" id="onlineUsers">0 คนออนไลน์</div>
+                    </div>
+                </div>
+                
+                <!-- Real-time Activity Feed -->
+                <div class="grid lg:grid-cols-3 gap-8 mb-8">
+                    <!-- User Activity History -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-6">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-2xl font-bold">ประวัติการวิเคราะห์ของคุณ</h2>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                    <span class="text-sm">อัปเดตล่าสุด</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div id="userActivityFeed" class="space-y-4 max-h-96 overflow-y-auto">
+                                <!-- User activity items will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Statistics -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-600 to-purple-500 text-white p-6">
+                            <h2 class="text-xl font-bold">สถิติส่วนตัว</h2>
+                        </div>
+                        <div class="p-6">
+                            <div id="userStats" class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-2xl">📷</span>
+                                        <span class="font-medium">ภาพที่วิเคราะห์</span>
+                                    </div>
+                                    <span class="text-xl font-bold text-blue-600" id="userTotalImages">0</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-2xl">🦠</span>
+                                        <span class="font-medium">โรคที่พบ</span>
+                                    </div>
+                                    <span class="text-xl font-bold text-red-600" id="userDiseasesFound">0</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-2xl">✅</span>
+                                        <span class="font-medium">พืชสุขภาพดี</span>
+                                    </div>
+                                    <span class="text-xl font-bold text-green-600" id="userHealthyPlants">0</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-2xl">📅</span>
+                                        <span class="font-medium">วันที่เข้าร่วม</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-600" id="userJoinDate">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="admin-table">
+                    <div class="bg-gradient-to-r from-green-800 to-green-600 text-white p-6">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-bold">ประวัติการวิเคราะห์ของคุณ</h2>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                    <span class="text-sm">อัปเดตอัตโนมัติ</span>
+                                </div>
+                                <button onclick="downloadUserCSV()" class="bg-white text-green-800 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+                                    📥 ดาวน์โหลดประวัติ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">วันที่</th>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">ชนิดพืช</th>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">โรคที่พบ</th>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">ความแม่นยำ</th>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="dataTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            แสดง 1-8 จาก 1,247 รายการ
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">ก่อนหน้า</button>
+                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg">1</button>
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">2</button>
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">3</button>
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">ถัดไป</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="grid md:grid-cols-2 gap-8 mt-8">
+                    <!-- Disease Distribution Chart -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">การกระจายของโรคพืช</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">โรคใบไหม้</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-32 bg-gray-200 rounded-full h-3">
+                                        <div class="bg-red-500 h-3 rounded-full" style="width: 45%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">45%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">โรคไหม้ใบ</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-32 bg-gray-200 rounded-full h-3">
+                                        <div class="bg-orange-500 h-3 rounded-full" style="width: 30%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">30%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">โรคใบจุด</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-32 bg-gray-200 rounded-full h-3">
+                                        <div class="bg-yellow-500 h-3 rounded-full" style="width: 25%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">25%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monthly Usage Chart -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">การใช้งานรายเดือน</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">มกราคม</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-32 bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-500 h-3 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">425</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">ธันวาคม</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-32 bg-gray-200 rounded-full h-3">
+                                        <div class="bg-green-500 h-3 rounded-full" style="width: 70%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">350</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">พฤศจิกายน</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-32 bg-gray-200 rounded-full h-3">
+                                        <div class="bg-purple-500 h-3 rounded-full" style="width: 60%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">298</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-green-800 text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <!-- Left: Copyright -->
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <p class="text-lg font-medium">
+                        © 2025 Smart Farming | All Rights Reserved
+                    </p>
+                    <p class="text-sm opacity-90">
+                        ระบบตรวจจับโรคพืชด้วยปัญญาประดิษฐ์
+                    </p>
+                </div>
+                
+                <!-- Right: Social Media -->
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="text-2xl hover:text-green-300 transition-colors" title="Facebook">📘</a>
+                    <a href="#" class="text-2xl hover:text-green-300 transition-colors" title="Instagram">📷</a>
+                    <a href="#" class="text-2xl hover:text-green-300 transition-colors" title="Twitter">🐦</a>
+                    <a href="#" class="text-2xl hover:text-green-300 transition-colors" title="YouTube">📺</a>
+                    <a href="#" class="text-2xl hover:text-green-300 transition-colors" title="Line">💬</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // User Management System
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('smartFarmingUsers') || '[]');
+        let userSessions = JSON.parse(localStorage.getItem('smartFarmingUserSessions') || '{}');
+        
+        // Login form functions
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
+        
+        function showRegisterForm() {
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+        }
+        
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                alert('❌ กรุณากรอกชื่อผู้ใช้งานและรหัสผ่าน');
+                return;
+            }
+            
+            // Find user
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                // Login successful
+                currentUser = user;
+                user.lastLogin = new Date().toISOString();
+                
+                // Save to localStorage
+                localStorage.setItem('smartFarmingUsers', JSON.stringify(users));
+                localStorage.setItem('smartFarmingCurrentUser', JSON.stringify(user));
+                
+                // Initialize user session data if not exists
+                if (!userSessions[user.username]) {
+                    userSessions[user.username] = {
+                        totalImages: 0,
+                        diseasesFound: 0,
+                        healthyPlants: 0,
+                        history: []
+                    };
+                    localStorage.setItem('smartFarmingUserSessions', JSON.stringify(userSessions));
+                }
+                
+                // Show success message
+                alert(`✅ เข้าสู่ระบบสำเร็จ!\n\nยินดีต้อนรับ ${user.fullName}`);
+                
+                // Update UI and show home page
+                updateUserInterface();
+                calculateGlobalStats(); // Refresh stats after login
+                showPage('home');
+                
+            } else {
+                alert('❌ ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง\n\nกรุณาตรวจสอบและลองใหม่อีกครั้ง');
+            }
+        }
+        
+        // Handle registration
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const fullName = document.getElementById('registerFullName').value.trim();
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            // Validation
+            if (!fullName || !username || !email || !password || !confirmPassword) {
+                alert('❌ กรุณากรอกข้อมูลให้ครบทุกช่อง');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('❌ รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('❌ รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+                return;
+            }
+            
+            // Check if username already exists
+            if (users.find(u => u.username === username)) {
+                alert('❌ ชื่อผู้ใช้งานนี้มีอยู่แล้ว\n\nกรุณาเลือกชื่อผู้ใช้งานอื่น');
+                return;
+            }
+            
+            // Check if email already exists
+            if (users.find(u => u.email === email)) {
+                alert('❌ อีเมลนี้มีอยู่แล้ว\n\nกรุณาใช้อีเมลอื่น');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                fullName: fullName,
+                username: username,
+                email: email,
+                password: password,
+                joinDate: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                avatar: getRandomAvatar()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('smartFarmingUsers', JSON.stringify(users));
+            
+            // Initialize user session
+            userSessions[username] = {
+                totalImages: 0,
+                diseasesFound: 0,
+                healthyPlants: 0,
+                history: []
+            };
+            localStorage.setItem('smartFarmingUserSessions', JSON.stringify(userSessions));
+            
+            // Auto login after registration
+            currentUser = newUser;
+            localStorage.setItem('smartFarmingCurrentUser', JSON.stringify(newUser));
+            
+            // Clear form fields
+            document.getElementById('registerFullName').value = '';
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerConfirmPassword').value = '';
+            
+            // Update UI first
+            updateUserInterface();
+            calculateGlobalStats(); // Refresh stats after registration
+            
+            // Show success message and redirect
+            alert(`✅ สมัครสมาชิกสำเร็จ!\n\nยินดีต้อนรับ ${fullName}\nกำลังพาคุณเข้าสู่หน้าหลัก...`);
+            
+            // Small delay then redirect to home page
+            setTimeout(() => {
+                showPage('home');
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }
+        
+        // Get random avatar
+        function getRandomAvatar() {
+            const avatars = ['👨‍🌾', '👩‍🌾', '👨‍💼', '👩‍💼', '👨‍🔬', '👩‍🔬', '👨‍💻', '👩‍💻'];
+            return avatars[Math.floor(Math.random() * avatars.length)];
+        }
+        
+        // Update user interface
+        function updateUserInterface() {
+            if (currentUser) {
+                // Show user profile, hide login
+                document.getElementById('userProfile').classList.remove('hidden');
+                document.getElementById('userProfile').classList.add('flex');
+                
+                // Update user info
+                document.getElementById('userDisplayName').textContent = currentUser.fullName;
+                document.getElementById('userAvatar').textContent = currentUser.avatar;
+                document.getElementById('userJoinDate').textContent = new Date(currentUser.joinDate).toLocaleDateString('th-TH');
+                
+                // Update navigation to show user pages
+                document.querySelector('#nav-admin span:last-child').textContent = 'ประวัติ';
+                
+                // Update user stats
+                updateUserStats();
+            } else {
+                // Hide user profile
+                document.getElementById('userProfile').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('flex');
+            }
+        }
+        
+        // Toggle user menu
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userProfile = document.getElementById('userProfile');
+            
+            if (userMenu && userProfile && !userProfile.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+                currentUser = null;
+                localStorage.removeItem('smartFarmingCurrentUser');
+                
+                // Reset UI
+                updateUserInterface();
+                
+                // Show login page
+                showPage('login');
+                
+                // Clear forms
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                alert('✅ ออกจากระบบเรียบร้อยแล้ว');
+            }
+        }
+        
+        // Check if user is logged in on page load
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('smartFarmingCurrentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUserInterface();
+                calculateGlobalStats(); // Load real stats on page load
+                showPage('home');
+            } else {
+                calculateGlobalStats(); // Load stats even for non-logged users
+                showPage('login');
+            }
+        }
+        
+        // Update user statistics
+        function updateUserStats() {
+            if (!currentUser) return;
+            
+            const userSession = userSessions[currentUser.username] || {
+                totalImages: 0,
+                diseasesFound: 0,
+                healthyPlants: 0,
+                history: []
+            };
+            
+            document.getElementById('userTotalImages').textContent = userSession.totalImages;
+            document.getElementById('userDiseasesFound').textContent = userSession.diseasesFound;
+            document.getElementById('userHealthyPlants').textContent = userSession.healthyPlants;
+            
+            // Also update global stats when user stats change
+            calculateGlobalStats();
+        }
+        
+        // Add analysis to user history
+        function addToUserHistory(plantType, disease, accuracy, status) {
+            if (!currentUser) return;
+            
+            const userSession = userSessions[currentUser.username];
+            if (!userSession) return;
+            
+            const now = new Date();
+            const historyItem = {
+                id: Date.now(),
+                date: now.toLocaleString('th-TH'),
+                plant: plantType,
+                disease: disease,
+                accuracy: accuracy,
+                status: status,
+                timestamp: now.toISOString()
+            };
+            
+            userSession.history.unshift(historyItem);
+            userSession.totalImages++;
+            
+            if (status === 'พบโรค') {
+                userSession.diseasesFound++;
+            } else {
+                userSession.healthyPlants++;
+            }
+            
+            // Keep only last 50 records
+            if (userSession.history.length > 50) {
+                userSession.history = userSession.history.slice(0, 50);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('smartFarmingUserSessions', JSON.stringify(userSessions));
+            
+            // Update UI
+            updateUserStats();
+            renderUserHistory();
+        }
+        
+        // Render user history
+        function renderUserHistory() {
+            if (!currentUser) return;
+            
+            const userSession = userSessions[currentUser.username];
+            if (!userSession || !userSession.history) return;
+            
+            const feed = document.getElementById('userActivityFeed');
+            const tableBody = document.getElementById('dataTableBody');
+            
+            if (feed) {
+                feed.innerHTML = userSession.history.slice(0, 10).map(item => `
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="text-2xl">${item.plant.includes('🍅') ? '🍅' : item.plant.includes('🌾') ? '🌾' : item.plant.includes('🌽') ? '🌽' : '🌱'}</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-gray-800">วิเคราะห์${item.plant}</span>
+                                <span class="text-xs text-gray-500">${new Date(item.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <p class="text-sm text-gray-600">ผลการวิเคราะห์: ${item.disease}</p>
+                            <span class="inline-block mt-1 px-2 py-1 text-xs rounded-full bg-${item.status === 'ปกติ' ? 'green' : 'red'}-100 text-${item.status === 'ปกติ' ? 'green' : 'red'}-800">
+                                ${item.status} (${item.accuracy})
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            if (tableBody) {
+                tableBody.innerHTML = userSession.history.slice(0, 8).map(item => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">${item.date}</td>
+                        <td class="px-6 py-4">${item.plant}</td>
+                        <td class="px-6 py-4">${item.disease}</td>
+                        <td class="px-6 py-4">
+                            <span class="bg-${item.status === 'ปกติ' ? 'green' : 'yellow'}-100 text-${item.status === 'ปกติ' ? 'green' : 'yellow'}-800 px-3 py-1 rounded-full text-sm">
+                                ${item.accuracy}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="bg-${item.status === 'ปกติ' ? 'green' : 'red'}-100 text-${item.status === 'ปกติ' ? 'green' : 'red'}-800 px-3 py-1 rounded-full text-sm">
+                                ${item.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        // Download user CSV
+        function downloadUserCSV() {
+            if (!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อน');
+                return;
+            }
+            
+            const userSession = userSessions[currentUser.username];
+            if (!userSession || !userSession.history || userSession.history.length === 0) {
+                alert('ไม่มีประวัติการวิเคราะห์');
+                return;
+            }
+            
+            // Create CSV data
+            const csvData = [
+                ['วันที่', 'ชนิดพืช', 'โรคที่พบ', 'ความแม่นยำ', 'สถานะ']
+            ];
+            
+            userSession.history.forEach(record => {
+                csvData.push([
+                    record.date,
+                    record.plant.replace(/🍅|🌾|🌽|🥬|🥒/g, '').trim(),
+                    record.disease,
+                    record.accuracy,
+                    record.status
+                ]);
+            });
+            
+            // Convert to CSV string
+            const csvString = csvData.map(row => row.join(',')).join('\n');
+            
+            // Create filename
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `${currentUser.username}-history-${dateStr}.csv`;
+            
+            // Download file
+            const blob = new Blob(['\ufeff' + csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`📥 ดาวน์โหลดประวัติเรียบร้อยแล้ว!\n\nไฟล์: ${filename}\nจำนวนข้อมูล: ${userSession.history.length} รายการ`);
+        }
+
+        // Page Navigation System
+        function showPage(pageId) {
+            // Check if user needs to be logged in for certain pages
+            if ((pageId === 'detect' || pageId === 'admin') && !currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อนใช้งาน');
+                showPage('login');
+                return;
+            }
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const activeNav = document.getElementById('nav-' + pageId);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+            
+            // Close mobile menu if open
+            const mobileNav = document.getElementById('mobileNav');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            if (mobileNav && !mobileNav.classList.contains('hidden')) {
+                mobileNav.classList.add('hidden');
+                mobileMenuBtn.textContent = '☰';
+            }
+            
+            // Handle dashboard real-time updates
+            if (pageId === 'admin') {
+                renderUserHistory();
+                updateUserStats();
+                calculateGlobalStats(); // Refresh global stats when viewing admin page
+            }
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileNav.classList.toggle('hidden');
+            mobileMenuBtn.textContent = mobileNav.classList.contains('hidden') ? '☰' : '✕';
+        });
+        
+        // Download CSV function
+        function downloadCSV() {
+            // Use current detection history data
+            const csvData = [
+                ['วันที่', 'ชนิดพืช', 'โรคที่พบ', 'ความแม่นยำ', 'สถานะ']
+            ];
+            
+            // Add detection history data
+            detectionHistory.forEach(record => {
+                csvData.push([
+                    record.date,
+                    record.plant.replace(/🍅|🌾|🌽|🥬|🥒/g, '').trim(),
+                    record.disease,
+                    record.accuracy,
+                    record.status
+                ]);
+            });
+            
+            // Convert to CSV string
+            const csvString = csvData.map(row => row.join(',')).join('\n');
+            
+            // Create filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `plant-disease-data-${dateStr}.csv`;
+            
+            // Create and download file
+            const blob = new Blob(['\ufeff' + csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show success message
+            alert(`📥 ดาวน์โหลดไฟล์ CSV เรียบร้อยแล้ว!\n\nไฟล์: ${filename}\nจำนวนข้อมูล: ${detectionHistory.length} รายการ`);
+        }
+        
+        // Add scroll effect to header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.backgroundColor = 'rgba(45, 80, 22, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.backgroundColor = '';
+                header.style.backdropFilter = '';
+            }
+        });
+        
+        // Animate cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all cards
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+        
+        // Camera and Detection Functions
+        let cameraStream = null;
+        let currentImageData = null;
+        let currentFacingMode = 'environment'; // 'environment' for back camera, 'user' for front camera
+        let availableCameras = [];
+        
+        // Open camera function
+        async function openCamera() {
+            try {
+                console.log('Starting camera access...');
+                
+                // Check if getUserMedia is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('❌ เบราว์เซอร์ของคุณไม่รองรับการใช้กล้อง\n\nกรุณาใช้:\n• Chrome, Firefox, Safari, Edge\n• เปิดผ่าน HTTPS หรือ localhost');
+                    return;
+                }
+                
+                // Show camera section first
+                document.getElementById('cameraSection').classList.remove('hidden');
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('resultsSection').classList.add('hidden');
+                
+                // Show loading message
+                const cameraInfo = document.getElementById('cameraInfo');
+                cameraInfo.textContent = '📷 กำลังเปิดกล้อง...';
+                
+                // Stop any existing stream first
+                if (cameraStream) {
+                    console.log('Stopping existing camera stream...');
+                    stopCamera();
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Wait a bit
+                }
+                
+                // Try different camera configurations based on current facing mode
+                const configurations = [
+                    // Try exact facing mode first
+                    {
+                        video: {
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 },
+                            facingMode: { exact: currentFacingMode }
+                        }
+                    },
+                    // Try ideal facing mode
+                    {
+                        video: {
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 },
+                            facingMode: { ideal: currentFacingMode }
+                        }
+                    },
+                    // Try opposite facing mode
+                    {
+                        video: {
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 },
+                            facingMode: currentFacingMode === 'environment' ? 'user' : 'environment'
+                        }
+                    },
+                    // PC camera or any available camera
+                    {
+                        video: {
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 }
+                        }
+                    },
+                    // Lower resolution fallback
+                    {
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        }
+                    },
+                    // Basic fallback
+                    {
+                        video: true
+                    }
+                ];
+                
+                let stream = null;
+                let lastError = null;
+                
+                // Try each configuration until one works
+                for (let i = 0; i < configurations.length; i++) {
+                    try {
+                        console.log(`Trying camera configuration ${i + 1}...`, configurations[i]);
+                        stream = await navigator.mediaDevices.getUserMedia(configurations[i]);
+                        console.log('Camera access successful!');
+                        break;
+                    } catch (error) {
+                        console.log(`Configuration ${i + 1} failed:`, error.name, error.message);
+                        lastError = error;
+                        continue;
+                    }
+                }
+                
+                if (!stream) {
+                    throw lastError || new Error('No camera configuration worked');
+                }
+                
+                cameraStream = stream;
+                const video = document.getElementById('cameraVideo');
+                
+                // Set up video element
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.setAttribute('autoplay', true);
+                video.muted = true;
+                
+                // Wait for video to be ready
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = () => {
+                        console.log('Video metadata loaded');
+                        video.play().then(() => {
+                            console.log('Video playing successfully');
+                            resolve();
+                        }).catch(reject);
+                    };
+                    
+                    video.onerror = (error) => {
+                        console.error('Video error:', error);
+                        reject(error);
+                    };
+                    
+                    // Timeout after 10 seconds
+                    setTimeout(() => reject(new Error('Video load timeout')), 10000);
+                });
+                
+                // Update camera info
+                updateCameraInfo(stream);
+                
+                // Scroll to camera section
+                document.getElementById('cameraSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                console.log('Camera setup complete!');
+                
+            } catch (error) {
+                console.error('Camera error:', error);
+                
+                let errorMessage = '❌ ไม่สามารถเปิดกล้องได้\n\n';
+                
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    errorMessage += '🔒 สาเหตุ: ไม่ได้รับอนุญาตใช้กล้อง\n\n';
+                    errorMessage += '✅ วิธีแก้ไข:\n';
+                    errorMessage += '• คลิกไอคอนกล้องในแถบที่อยู่\n';
+                    errorMessage += '• เลือก "อนุญาต" หรือ "Allow"\n';
+                    errorMessage += '• รีเฟรชหน้าเว็บแล้วลองใหม่';
+                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                    errorMessage += '📷 สาเหตุ: ไม่พบกล้องในอุปกรณ์\n\n';
+                    errorMessage += '✅ วิธีแก้ไข:\n';
+                    errorMessage += '• ตรวจสอบว่ากล้องเชื่อมต่อแล้ว\n';
+                    errorMessage += '• ปิดแอปอื่นที่ใช้กล้องอยู่\n';
+                    errorMessage += '• ลองใช้เบราว์เซอร์อื่น';
+                } else if (error.name === 'NotSupportedError' || error.name === 'NotReadableError') {
+                    errorMessage += '🌐 สาเหตุ: เบราว์เซอร์หรือกล้องไม่รองรับ\n\n';
+                    errorMessage += '✅ วิธีแก้ไข:\n';
+                    errorMessage += '• ใช้ Chrome, Firefox, Safari หรือ Edge\n';
+                    errorMessage += '• เปิดผ่าน HTTPS หรือ localhost\n';
+                    errorMessage += '• อัปเดตเบราว์เซอร์เป็นเวอร์ชันล่าสุด';
+                } else if (error.message === 'Video load timeout') {
+                    errorMessage += '⏱️ สาเหตุ: กล้องใช้เวลานานเกินไป\n\n';
+                    errorMessage += '✅ วิธีแก้ไข:\n';
+                    errorMessage += '• ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต\n';
+                    errorMessage += '• ปิดแอปอื่นที่ใช้กล้อง\n';
+                    errorMessage += '• ลองใหม่อีกครั้ง';
+                } else {
+                    errorMessage += '⚠️ เกิดข้อผิดพลาดไม่ทราบสาเหตุ\n\n';
+                    errorMessage += '✅ วิธีแก้ไข:\n';
+                    errorMessage += '• รีเฟรชหน้าเว็บ\n';
+                    errorMessage += '• ลองใช้เบราว์เซอร์อื่น\n';
+                    errorMessage += '• ตรวจสอบการตั้งค่าความเป็นส่วนตัว';
+                }
+                
+                alert(errorMessage);
+                
+                // Clean up on error
+                if (cameraStream) {
+                    stopCamera();
+                }
+                
+                // Hide camera section on error
+                document.getElementById('cameraSection').classList.add('hidden');
+            }
+        }
+        
+        // Update camera info display
+        function updateCameraInfo(stream) {
+            const cameraInfo = document.getElementById('cameraInfo');
+            if (stream && stream.getVideoTracks().length > 0) {
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                const facingMode = settings.facingMode || 'unknown';
+                
+                let cameraType = '';
+                if (facingMode === 'environment') {
+                    cameraType = '📷 กล้องหลัง';
+                } else if (facingMode === 'user') {
+                    cameraType = '🤳 กล้องหน้า';
+                } else {
+                    cameraType = '📹 กล้อง PC';
+                }
+                
+                const resolution = settings.width && settings.height ? 
+                    ` (${settings.width}x${settings.height})` : '';
+                
+                cameraInfo.textContent = `${cameraType}${resolution}`;
+            } else {
+                cameraInfo.textContent = '📷 กำลังโหลด...';
+            }
+        }
+        
+        // Switch camera function
+        async function switchCamera() {
+            if (!cameraStream) {
+                alert('กรุณาเปิดกล้องก่อน');
+                return;
+            }
+            
+            try {
+                // Toggle facing mode
+                currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+                
+                // Show loading
+                document.getElementById('cameraInfo').textContent = '🔄 กำลังเปลี่ยนกล้อง...';
+                
+                // Stop current stream
+                stopCamera();
+                
+                // Wait a bit then start new camera
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await openCamera();
+                
+            } catch (error) {
+                console.error('Error switching camera:', error);
+                alert('ไม่สามารถเปลี่ยนกล้องได้ อาจไม่มีกล้องอื่นให้เลือก');
+                
+                // Try to restart original camera
+                currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+                await openCamera();
+            }
+        }
+        
+        // Stop camera function
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log('Camera track stopped:', track.kind);
+                });
+                cameraStream = null;
+            }
+            document.getElementById('cameraSection').classList.add('hidden');
+            document.getElementById('cameraInfo').textContent = '📷 กำลังโหลด...';
+        }
+        
+        // Capture photo from camera
+        function capturePhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            
+            // Convert to blob and display
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                displayImage(url);
+                currentImageData = blob;
+            }, 'image/jpeg', 0.8);
+            
+            // Stop camera after capture
+            stopCamera();
+        }
+        
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
+            
+            console.log('File selected:', file.name, file.type, file.size);
+            
+            // Check if it's an image
+            if (!file.type.startsWith('image/')) {
+                alert('❌ กรุณาเลือกไฟล์ภาพเท่านั้น\n\nไฟล์ที่รองรับ: JPG, PNG, GIF, WebP');
+                event.target.value = ''; // Clear the input
+                return;
+            }
+            
+            // Check file size (max 10MB)
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('❌ ไฟล์ใหญ่เกินไป\n\nขนาดสูงสุด: 10MB\nขนาดไฟล์ของคุณ: ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+                event.target.value = ''; // Clear the input
+                return;
+            }
+            
+            try {
+                const url = URL.createObjectURL(file);
+                displayImage(url);
+                currentImageData = file;
+                
+                console.log('File processed successfully');
+                
+                // Show success message
+                const fileName = file.name.length > 20 ? file.name.substring(0, 20) + '...' : file.name;
+                setTimeout(() => {
+                    alert('✅ อัปโหลดไฟล์สำเร็จ!\n\nไฟล์: ' + fileName + '\nขนาด: ' + (file.size / 1024).toFixed(1) + ' KB');
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error processing file:', error);
+                alert('❌ เกิดข้อผิดพลาดในการประมวลผลไฟล์\n\nกรุณาลองใหม่อีกครั้ง');
+                event.target.value = ''; // Clear the input
+            }
+        }
+        
+        // Display selected/captured image
+        function displayImage(url) {
+            const previewImage = document.getElementById('previewImage');
+            previewImage.src = url;
+            
+            // Show preview section
+            document.getElementById('imagePreview').classList.remove('hidden');
+            document.getElementById('cameraSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Scroll to preview
+            document.getElementById('imagePreview').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+        
+        // Analyze image function (Demo)
+        function analyzeImage() {
+            if (!currentImageData) {
+                alert('กรุณาเลือกภาพก่อนวิเคราะห์');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingSection').classList.remove('hidden');
+            document.getElementById('imagePreview').classList.add('hidden');
+            
+            // Simulate AI analysis (replace with real AI when integrated)
+            setTimeout(() => {
+                showDemoResults();
+            }, 3000);
+        }
+        
+        // Show demo results
+        function showDemoResults() {
+            const diseases = [
+                {
+                    name: 'โรคใบไหม้',
+                    confidence: 94.2,
+                    severity: 'ปานกลาง',
+                    treatment: 'ใช้สารป้องกันกำจัดเชื้อรา พ่นทุก 7-10 วัน',
+                    prevention: 'รักษาความชื้นไม่ให้สูงเกินไป ระบายอากาศให้ดี',
+                    color: 'red',
+                    status: 'พบโรค'
+                },
+                {
+                    name: 'สุขภาพดี',
+                    confidence: 97.8,
+                    severity: 'ปกติ',
+                    treatment: 'ไม่จำเป็นต้องรักษา',
+                    prevention: 'ดูแลรักษาตามปกติ รดน้ำสม่ำเสมอ',
+                    color: 'green',
+                    status: 'ปกติ'
+                },
+                {
+                    name: 'โรคใบจุด',
+                    confidence: 87.5,
+                    severity: 'เล็กน้อย',
+                    treatment: 'ตัดใบที่เป็นโรคทิ้ง ใช้สารป้องกันกำจัดเชื้อรา',
+                    prevention: 'หลีกเลี่ยงการรดน้ำใส่ใบ รักษาระยะห่างระหว่างต้น',
+                    color: 'yellow',
+                    status: 'พบโรค'
+                }
+            ];
+            
+            const plants = ['🍅 มะเขือเทศ', '🌾 ข้าว', '🌽 ข้าวโพด', '🥬 ผักกาด', '🥒 แตงกวา'];
+            
+            // Random result for demo
+            const result = diseases[Math.floor(Math.random() * diseases.length)];
+            const plant = plants[Math.floor(Math.random() * plants.length)];
+            
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-4">${result.color === 'green' ? '✅' : result.color === 'yellow' ? '⚠️' : '🚨'}</div>
+                    <h4 class="text-2xl font-bold text-gray-800">${result.name}</h4>
+                    <div class="mt-2">
+                        <span class="bg-${result.color === 'green' ? 'green' : result.color === 'yellow' ? 'yellow' : 'red'}-100 text-${result.color === 'green' ? 'green' : result.color === 'yellow' ? 'yellow' : 'red'}-800 px-4 py-2 rounded-full text-lg font-semibold">
+                            ความแม่นยำ ${result.confidence}%
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 rounded-xl p-4">
+                        <h5 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <span class="text-xl mr-2">📊</span>
+                            ระดับความรุนแรง
+                        </h5>
+                        <p class="text-blue-700">${result.severity}</p>
+                    </div>
+                    
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <h5 class="font-semibold text-green-800 mb-2 flex items-center">
+                            <span class="text-xl mr-2">💊</span>
+                            การรักษา
+                        </h5>
+                        <p class="text-green-700 text-sm">${result.treatment}</p>
+                    </div>
+                    
+                    <div class="bg-purple-50 rounded-xl p-4 md:col-span-2">
+                        <h5 class="font-semibold text-purple-800 mb-2 flex items-center">
+                            <span class="text-xl mr-2">🛡️</span>
+                            การป้องกัน
+                        </h5>
+                        <p class="text-purple-700 text-sm">${result.prevention}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gray-50 rounded-xl">
+                    <p class="text-sm text-gray-600 text-center">
+                        <strong>หมายเหตุ:</strong> นี่เป็นผลการวิเคราะห์เบื้องต้น 
+                        หากมีข้อสงสัยควรปรึกษาผู้เชี่ยวชาญด้านการเกษตร
+                    </p>
+                </div>
+            `;
+            
+            // Save to user history
+            if (currentUser) {
+                addToUserHistory(plant, result.name, result.confidence.toFixed(1) + '%', result.status);
+            }
+            
+            // Hide loading and show results
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+        
+        // Reset detection
+        function resetDetection() {
+            // Hide all sections
+            document.getElementById('cameraSection').classList.add('hidden');
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Clear data
+            currentImageData = null;
+            document.getElementById('fileInput').value = '';
+            
+            // Stop camera if running
+            if (cameraStream) {
+                stopCamera();
+            }
+            
+            // Scroll to top of detect section
+            document.querySelector('#detect-page .text-center').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+        
+        // Real-time Dashboard Functions
+        let dashboardInterval;
+        let activityData = [];
+        let detectionHistory = [];
+        let onlineUsers = [
+            { name: 'สมชาย ใจดี', status: 'กำลังวิเคราะห์ภาพ', time: '2 นาทีที่แล้ว', avatar: '👨‍🌾' },
+            { name: 'สมหญิง รักษ์ดิน', status: 'ดูข้อมูลสถิติ', time: '5 นาทีที่แล้ว', avatar: '👩‍🌾' },
+            { name: 'วิชัย เกษตรกร', status: 'อัปโหลดภาพใหม่', time: '8 นาทีที่แล้ว', avatar: '👨‍💼' },
+            { name: 'มาลี ปลูกผัก', status: 'ออนไลน์', time: 'เมื่อสักครู่', avatar: '👩‍💻' },
+            { name: 'สุรชัย ไร่นา', status: 'กำลังวิเคราะห์ภาพ', time: '12 นาทีที่แล้ว', avatar: '👨‍🔬' },
+            { name: 'นิภา สวนผล', status: 'ดูผลการวิเคราะห์', time: '15 นาทีที่แล้ว', avatar: '👩‍🌾' },
+            { name: 'ประยุทธ์ เกษตร', status: 'ออนไลน์', time: 'เมื่อสักครู่', avatar: '👨‍🌾' }
+        ];
+        
+        function updateDashboard() {
+            updateStats();
+            updateActivityFeed();
+            updateOnlineUsers();
+            updateLastUpdateTime();
+        }
+        
+        function updateStats() {
+            // Calculate real statistics from all users
+            calculateGlobalStats();
+        }
+        
+        function calculateGlobalStats() {
+            const totalImages = document.getElementById('totalImages');
+            const diseasesFound = document.getElementById('diseasesFound');
+            const accuracy = document.getElementById('accuracy');
+            const activeUsers = document.getElementById('activeUsers');
+            const onlineUsersCount = document.getElementById('onlineUsers');
+            const todayImages = document.getElementById('todayImages');
+            const todayDiseases = document.getElementById('todayDiseases');
+            const accuracyChange = document.getElementById('accuracyChange');
+            
+            // Calculate totals from all users
+            let globalTotalImages = 0;
+            let globalDiseasesFound = 0;
+            let globalHealthyPlants = 0;
+            let totalAccuracySum = 0;
+            let totalAnalyses = 0;
+            let todayImagesCount = 0;
+            let todayDiseasesCount = 0;
+            
+            const today = new Date().toDateString();
+            
+            // Loop through all user sessions
+            Object.values(userSessions).forEach(session => {
+                globalTotalImages += session.totalImages || 0;
+                globalDiseasesFound += session.diseasesFound || 0;
+                globalHealthyPlants += session.healthyPlants || 0;
+                
+                // Calculate accuracy from history
+                if (session.history && session.history.length > 0) {
+                    session.history.forEach(record => {
+                        const accuracy = parseFloat(record.accuracy);
+                        if (!isNaN(accuracy)) {
+                            totalAccuracySum += accuracy;
+                            totalAnalyses++;
+                        }
+                        
+                        // Count today's activities
+                        const recordDate = new Date(record.timestamp || record.date);
+                        if (recordDate.toDateString() === today) {
+                            todayImagesCount++;
+                            if (record.status === 'พบโรค') {
+                                todayDiseasesCount++;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Update display
+            totalImages.textContent = globalTotalImages.toLocaleString();
+            diseasesFound.textContent = globalDiseasesFound.toLocaleString();
+            
+            // Calculate average accuracy
+            const avgAccuracy = totalAnalyses > 0 ? (totalAccuracySum / totalAnalyses) : 0;
+            accuracy.textContent = avgAccuracy > 0 ? avgAccuracy.toFixed(1) + '%' : '0%';
+            
+            // Update user count
+            const totalUsers = users.length;
+            activeUsers.textContent = totalUsers.toLocaleString();
+            
+            // Simulate online users (1-5 users online)
+            const onlineCount = Math.min(totalUsers, Math.floor(Math.random() * 5) + 1);
+            onlineUsersCount.textContent = `${onlineCount} คนออนไลน์`;
+            
+            // Update today's counts
+            todayImages.textContent = `+${todayImagesCount} วันนี้`;
+            todayDiseases.textContent = `+${todayDiseasesCount} วันนี้`;
+            
+            // Update accuracy change text
+            if (totalAnalyses > 0) {
+                accuracyChange.textContent = `เฉลี่ยจาก ${totalAnalyses} การวิเคราะห์`;
+            } else {
+                accuracyChange.textContent = 'ยังไม่มีข้อมูล';
+            }
+        }
+        
+        function updateActivityFeed() {
+            const activities = [
+                { user: 'สมชาย ใจดี', action: 'วิเคราะห์ภาพมะเขือเทศ', result: 'พบโรคใบไหม้', icon: '🍅', color: 'red' },
+                { user: 'สมหญิง รักษ์ดิน', action: 'วิเคราะห์ภาพข้าว', result: 'สุขภาพดี', icon: '🌾', color: 'green' },
+                { user: 'วิชัย เกษตรกร', action: 'วิเคราะห์ภาพข้าวโพด', result: 'พบโรคใบจุด', icon: '🌽', color: 'yellow' },
+                { user: 'มาลี ปลูกผัก', action: 'เข้าสู่ระบบ', result: 'ออนไลน์', icon: '👋', color: 'blue' },
+                { user: 'สุรชัย ไร่นา', action: 'ดาวน์โหลดรายงาน', result: 'สำเร็จ', icon: '📊', color: 'purple' },
+                { user: 'นิภา สวนผล', action: 'วิเคราะห์ภาพมะเขือเทศ', result: 'สุขภาพดี', icon: '🍅', color: 'green' }
+            ];
+            
+            if (Math.random() > 0.6) { // 40% chance to add new activity
+                const newActivity = activities[Math.floor(Math.random() * activities.length)];
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                
+                activityData.unshift({
+                    ...newActivity,
+                    time: timeStr,
+                    id: Date.now()
+                });
+                
+                // Keep only last 20 activities
+                if (activityData.length > 20) {
+                    activityData = activityData.slice(0, 20);
+                }
+                
+                renderActivityFeed();
+            }
+        }
+        
+        function renderActivityFeed() {
+            const feed = document.getElementById('activityFeed');
+            if (!feed) return;
+            
+            feed.innerHTML = activityData.map(activity => `
+                <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="text-2xl">${activity.icon}</div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-semibold text-gray-800">${activity.user}</span>
+                            <span class="text-xs text-gray-500">${activity.time}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">${activity.action}</p>
+                        <span class="inline-block mt-1 px-2 py-1 text-xs rounded-full bg-${activity.color === 'red' ? 'red' : activity.color === 'green' ? 'green' : activity.color === 'yellow' ? 'yellow' : activity.color === 'blue' ? 'blue' : 'purple'}-100 text-${activity.color === 'red' ? 'red' : activity.color === 'green' ? 'green' : activity.color === 'yellow' ? 'yellow' : activity.color === 'blue' ? 'blue' : 'purple'}-800">
+                            ${activity.result}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateOnlineUsers() {
+            const usersList = document.getElementById('onlineUsersList');
+            if (!usersList) return;
+            
+            // Randomly shuffle and select 5-7 users
+            const shuffled = [...onlineUsers].sort(() => 0.5 - Math.random());
+            const selectedUsers = shuffled.slice(0, Math.floor(Math.random() * 3) + 5);
+            
+            usersList.innerHTML = selectedUsers.map(user => `
+                <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                    <div class="text-2xl">${user.avatar}</div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-800 text-sm">${user.name}</div>
+                        <div class="text-xs text-gray-600">${user.status}</div>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-gray-500">${user.time}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateLastUpdateTime() {
+            const lastUpdate = document.getElementById('lastUpdate');
+            if (lastUpdate) {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                lastUpdate.textContent = `อัปเดตล่าสุด: ${timeStr}`;
+            }
+        }
+        
+        // Generate current date data
+        function generateCurrentData() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            
+            // Generate detection history for today
+            detectionHistory = [];
+            for (let i = 0; i < 15; i++) {
+                const time = new Date(now.getTime() - (i * 30 * 60 * 1000)); // Every 30 minutes
+                const plants = ['🍅 มะเขือเทศ', '🌾 ข้าว', '🌽 ข้าวโพด', '🥬 ผักกาด', '🥒 แตงกวา'];
+                const diseases = [
+                    { name: 'สุขภาพดี', status: 'ปกติ', color: 'green' },
+                    { name: 'โรคใบไหม้', status: 'พบโรค', color: 'red' },
+                    { name: 'โรคใบจุด', status: 'พบโรค', color: 'red' },
+                    { name: 'โรคไหม้ใบ', status: 'พบโรค', color: 'red' }
+                ];
+                
+                const plant = plants[Math.floor(Math.random() * plants.length)];
+                const disease = diseases[Math.floor(Math.random() * diseases.length)];
+                const accuracy = (Math.random() * 15 + 85).toFixed(1); // 85-100%
+                
+                detectionHistory.push({
+                    date: time.toLocaleString('th-TH', { 
+                        year: 'numeric', 
+                        month: '2-digit', 
+                        day: '2-digit',
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    plant: plant,
+                    disease: disease.name,
+                    accuracy: accuracy + '%',
+                    status: disease.status,
+                    color: disease.color
+                });
+            }
+            
+            renderDataTable();
+        }
+        
+        function renderDataTable() {
+            const tbody = document.getElementById('dataTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = detectionHistory.map(record => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">${record.date}</td>
+                    <td class="px-6 py-4">${record.plant}</td>
+                    <td class="px-6 py-4">${record.disease}</td>
+                    <td class="px-6 py-4">
+                        <span class="bg-${record.color === 'green' ? 'green' : 'yellow'}-100 text-${record.color === 'green' ? 'green' : 'yellow'}-800 px-3 py-1 rounded-full text-sm">
+                            ${record.accuracy}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-${record.color}-100 text-${record.color}-800 px-3 py-1 rounded-full text-sm">
+                            ${record.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function addNewDetection() {
+            const now = new Date();
+            const plants = ['🍅 มะเขือเทศ', '🌾 ข้าว', '🌽 ข้าวโพด', '🥬 ผักกาด', '🥒 แตงกวา'];
+            const diseases = [
+                { name: 'สุขภาพดี', status: 'ปกติ', color: 'green' },
+                { name: 'โรคใบไหม้', status: 'พบโรค', color: 'red' },
+                { name: 'โรคใบจุด', status: 'พบโรค', color: 'red' },
+                { name: 'โรคไหม้ใบ', status: 'พบโรค', color: 'red' }
+            ];
+            
+            const plant = plants[Math.floor(Math.random() * plants.length)];
+            const disease = diseases[Math.floor(Math.random() * diseases.length)];
+            const accuracy = (Math.random() * 15 + 85).toFixed(1);
+            
+            const newRecord = {
+                date: now.toLocaleString('th-TH', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }),
+                plant: plant,
+                disease: disease.name,
+                accuracy: accuracy + '%',
+                status: disease.status,
+                color: disease.color
+            };
+            
+            detectionHistory.unshift(newRecord);
+            if (detectionHistory.length > 20) {
+                detectionHistory = detectionHistory.slice(0, 20);
+            }
+            
+            renderDataTable();
+        }
+        
+        function startDashboard() {
+            // Generate initial data
+            generateCurrentData();
+            
+            // Initialize with some sample data
+            const sampleActivities = [
+                { user: 'สมชาย ใจดี', action: 'วิเคราะห์ภาพมะเขือเทศ', result: 'พบโรคใบไหม้', icon: '🍅', color: 'red', time: '14:30', id: 1 },
+                { user: 'สมหญิง รักษ์ดิน', action: 'วิเคราะห์ภาพข้าว', result: 'สุขภาพดี', icon: '🌾', color: 'green', time: '14:25', id: 2 },
+                { user: 'วิชัย เกษตรกร', action: 'เข้าสู่ระบบ', result: 'ออนไลน์', icon: '👋', color: 'blue', time: '14:20', id: 3 }
+            ];
+            
+            activityData = [...sampleActivities];
+            renderActivityFeed();
+            updateOnlineUsers();
+            
+            // Start real-time updates
+            dashboardInterval = setInterval(() => {
+                updateDashboard();
+                // Occasionally add new detection
+                if (Math.random() > 0.8) {
+                    addNewDetection();
+                }
+            }, 3000); // Update every 3 seconds
+        }
+        
+        function stopDashboard() {
+            if (dashboardInterval) {
+                clearInterval(dashboardInterval);
+                dashboardInterval = null;
+            }
+        }
+
+        // Scroll to section function
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            } else {
+                // If section doesn't exist, show a demo
+                showDemoAnalysis();
+            }
+        }
+        
+        // Show demo analysis
+        function showDemoAnalysis() {
+            // Show loading section temporarily for demo
+            document.getElementById('loadingSection').classList.remove('hidden');
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Scroll to loading section
+            document.getElementById('loadingSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // Show demo results after 2 seconds
+            setTimeout(() => {
+                showDemoResults();
+            }, 2000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check login status first
+            checkLoginStatus();
+            
+            // Initialize camera capabilities check
+            checkCameraSupport();
+        });
+        
+        // Check camera support
+        async function checkCameraSupport() {
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    // Try to enumerate devices to check camera availability
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    if (videoDevices.length > 0) {
+                        console.log(`Found ${videoDevices.length} camera(s)`);
+                        availableCameras = videoDevices;
+                        
+                        // Update switch camera button visibility
+                        const switchBtn = document.getElementById('switchCameraBtn');
+                        if (videoDevices.length > 1) {
+                            switchBtn.style.display = 'inline-block';
+                        } else {
+                            switchBtn.style.display = 'none';
+                        }
+                    } else {
+                        console.log('No cameras found');
+                    }
+                } else {
+                    console.log('Camera not supported');
+                }
+            } catch (error) {
+                console.log('Error checking camera support:', error);
+            }
+            
+            // Initialize drag and drop
+            initializeDragAndDrop();
+        }
+        
+        // Initialize drag and drop functionality
+        function initializeDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            
+            if (!dropZone) return;
+            
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            // Highlight drop zone when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            // Handle dropped files
+            dropZone.addEventListener('drop', handleDrop, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight(e) {
+                dropZone.classList.add('border-blue-500', 'bg-blue-200');
+                dropZone.classList.remove('border-blue-300', 'bg-blue-50');
+            }
+            
+            function unhighlight(e) {
+                dropZone.classList.remove('border-blue-500', 'bg-blue-200');
+                dropZone.classList.add('border-blue-300', 'bg-blue-50');
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    const file = files[0];
+                    console.log('File dropped:', file.name);
+                    
+                    // Create a fake event object for handleFileSelect
+                    const fakeEvent = {
+                        target: {
+                            files: [file],
+                            value: ''
+                        }
+                    };
+                    
+                    handleFileSelect(fakeEvent);
+                }
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9874efeaf7a14f52',t:'MTc1OTI0ODA3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
